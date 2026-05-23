@@ -270,7 +270,7 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 [[package]]
 name = "signal-domain-criome"
 version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/signal-domain-criome.git?branch=cloud-domain-criome-runtime#14553ab6ac59efe482953708764b47cf754e7734"
+source = "git+https://github.com/LiGoldragon/signal-domain-criome.git?branch=cloud-domain-criome-runtime#70e604211cea1367f845331b54ab73cf179c8179"
 dependencies = [
  "nota-codec",
  "rkyv",

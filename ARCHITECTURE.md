@@ -18,6 +18,8 @@ it.
 
 - `RegisterDomain(Registration)` registers a domain root.
 - `Delegate(Delegation)` delegates a named branch.
+- `RegisterAuthority(AuthorityRegistration)` records an off-daemon authority
+  endpoint for a domain whose own daemon should answer resolution.
 - `RetireDomain(Retirement)` retires a registered domain.
 - `SetPolicy(Policy)` changes projection policy.
 
@@ -25,6 +27,7 @@ it.
 
 - Domain-registration authority.
 - Delegation authority.
+- Off-daemon authority endpoint registration.
 - Projection-policy directives.
 - Typed owner rejections.
 

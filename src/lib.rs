@@ -6,7 +6,7 @@ use nota_codec::{NotaEnum, NotaRecord, NotaTransparent};
 use rkyv::{Archive, Deserialize as RkyvDeserialize, Serialize as RkyvSerialize};
 use signal_frame::signal_channel;
 
-pub use signal_domain_criome::{DelegationName, DomainName, ProjectionScope};
+pub use signal_domain_criome::{AuthorityEndpoint, DelegationName, DomainName, ProjectionScope};
 
 #[derive(
     Archive, RkyvSerialize, RkyvDeserialize, NotaTransparent, Debug, Clone, PartialEq, Eq, Hash,
@@ -33,6 +33,12 @@ pub struct Delegation {
     pub name: DelegationName,
     pub domain: DomainName,
     pub target: DelegationTarget,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct AuthorityRegistration {
+    pub domain: DomainName,
+    pub endpoint: AuthorityEndpoint,
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
@@ -72,6 +78,12 @@ pub struct DomainDelegated {
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct AuthorityRegistered {
+    pub domain: DomainName,
+    pub endpoint: AuthorityEndpoint,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
 pub struct DomainRetired {
     pub domain: DomainName,
 }
@@ -89,6 +101,7 @@ pub enum RejectionReason {
     DomainUnknown,
     DelegationAlreadyExists,
     DelegationUnknown,
+    AuthorityAlreadyRegistered,
     ProjectionUnavailable,
 }
 
@@ -102,12 +115,14 @@ signal_channel! {
     channel OwnerDomainCriome {
         operation RegisterDomain(Registration),
         operation Delegate(Delegation),
+        operation RegisterAuthority(AuthorityRegistration),
         operation RetireDomain(Retirement),
         operation SetPolicy(Policy),
     }
     reply Reply {
         DomainRegistered(DomainRegistered),
         DomainDelegated(DomainDelegated),
+        AuthorityRegistered(AuthorityRegistered),
         DomainRetired(DomainRetired),
         PolicySet(PolicySet),
         RequestRejected(RequestRejected),
