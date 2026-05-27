@@ -2,26 +2,14 @@
 //!
 //! This crate carries owner-only domain registry and projection-policy records.
 
-use nota_codec::{NotaEnum, NotaRecord, NotaTransparent};
+use nota_codec::{NotaEnum, NotaRecord};
 use rkyv::{Archive, Deserialize as RkyvDeserialize, Serialize as RkyvSerialize};
 use signal_frame::signal_channel;
 
-pub use signal_domain_criome::{DelegationName, DomainName, ProjectionScope};
-
-#[derive(
-    Archive, RkyvSerialize, RkyvDeserialize, NotaTransparent, Debug, Clone, PartialEq, Eq, Hash,
-)]
-pub struct DelegationTarget(String);
-
-impl DelegationTarget {
-    pub fn new(value: impl Into<String>) -> Self {
-        Self(value.into())
-    }
-
-    pub fn as_str(&self) -> &str {
-        &self.0
-    }
-}
+pub use signal_domain_criome::{
+    DelegationName, DelegationTarget, DomainName, DomainNameSystemRecord, ProjectionScope,
+    RecordKind, RecordValue, RedirectRule,
+};
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
 pub struct Registration {
@@ -61,6 +49,13 @@ pub struct Policy {
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct ProjectionDeclaration {
+    pub domain: DomainName,
+    pub records: Vec<DomainNameSystemRecord>,
+    pub redirects: Vec<RedirectRule>,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
 pub struct DomainRegistered {
     pub domain: DomainName,
 }
@@ -79,6 +74,13 @@ pub struct DomainRetired {
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
 pub struct PolicySet {
     pub projection_policy_count: u64,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct ProjectionSet {
+    pub domain: DomainName,
+    pub record_count: u64,
+    pub redirect_count: u64,
 }
 
 #[derive(
@@ -104,12 +106,14 @@ signal_channel! {
         operation Delegate(Delegation),
         operation RetireDomain(Retirement),
         operation SetPolicy(Policy),
+        operation SetProjection(ProjectionDeclaration),
     }
     reply Reply {
         DomainRegistered(DomainRegistered),
         DomainDelegated(DomainDelegated),
         DomainRetired(DomainRetired),
         PolicySet(PolicySet),
+        ProjectionSet(ProjectionSet),
         RequestRejected(RequestRejected),
     }
 }

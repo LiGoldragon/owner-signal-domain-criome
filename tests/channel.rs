@@ -1,8 +1,9 @@
 use nota_codec::{Decoder, Encoder, NotaDecode, NotaEncode};
 use owner_signal_domain_criome::{
-    Delegation, DelegationName, DelegationTarget, DomainName, DomainRegistered, Operation,
-    OperationKind, Policy, PolicySet, ProjectionDirective, ProjectionPolicy, ProjectionScope,
-    Registration, Reply, ReplyKind,
+    Delegation, DelegationName, DelegationTarget, DomainName, DomainNameSystemRecord,
+    DomainRegistered, Operation, OperationKind, Policy, PolicySet, ProjectionDeclaration,
+    ProjectionDirective, ProjectionPolicy, ProjectionScope, RecordKind, RecordValue, Registration,
+    Reply, ReplyKind,
 };
 use signal_frame::{RequestPayload, SignalOperationHeads};
 
@@ -16,7 +17,13 @@ fn encode_to_text<T: NotaEncode>(value: &T) -> String {
 fn operations_are_owner_registry_verbs() {
     assert_eq!(
         <Operation as SignalOperationHeads>::HEADS,
-        &["RegisterDomain", "Delegate", "RetireDomain", "SetPolicy"]
+        &[
+            "RegisterDomain",
+            "Delegate",
+            "RetireDomain",
+            "SetPolicy",
+            "SetProjection",
+        ]
     );
 
     let operation = Operation::RegisterDomain(Registration {
@@ -62,6 +69,21 @@ fn policy_uses_projection_directives_not_boolean_flags() {
     });
 
     assert_eq!(operation.operation_kind(), OperationKind::SetPolicy);
+}
+
+#[test]
+fn projection_declarations_carry_provider_neutral_records() {
+    let operation = Operation::SetProjection(ProjectionDeclaration {
+        domain: DomainName::new("goldragon.criome"),
+        records: vec![DomainNameSystemRecord {
+            name: DomainName::new("goldragon.criome"),
+            kind: RecordKind::AddressV4,
+            value: RecordValue::new("203.0.113.10"),
+        }],
+        redirects: vec![],
+    });
+
+    assert_eq!(operation.operation_kind(), OperationKind::SetProjection);
 }
 
 #[test]
